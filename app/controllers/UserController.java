@@ -120,5 +120,13 @@ public class UserController extends Controller {
 	        }
 	    }
     }
+	
+	@Transactional
+	public Result update(String id) {
+		Query result = jpaApi.em().createNativeQuery("SELECT * FROM User where id = "+id+";");
+		Logger.debug(result.toString());
+		User user = (User) result.getSingleResult();
+		return ok(user.getName());
+    }
 
 }
