@@ -1,5 +1,6 @@
 package controllers;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,19 +92,27 @@ public class UserController extends Controller {
 	@Transactional
 	public Result create() {
 		JsonNode json = request().body().asJson();
+		ObjectNode response = Json.newObject();
 	    if(json == null) {
-	        return badRequest("Expecting Json data");
+	    	response.put("message", "Expecting Json data");
+        	return badRequest(response);
 	    } else {
 	        String name = json.findPath("name").textValue();
 	        String email = json.findPath("email").textValue();
 	        String password = json.findPath("password").textValue();
 	        String telefone = json.findPath("telefone").textValue();
 	        if(name == null || email == null || password == null || telefone == null) {
-	            return badRequest("Missing parameters");
+	        	response.put("message", "Parametros faltando");
+	        	return badRequest(response);
 	        } else {
 	        	Logger.info("Entered");
-	        	User newestUser = new User(name, email, password, telefone);
-	        	ObjectNode response = Json.newObject();
+	        	User newestUser = new User();
+	        	newestUser.setEmail(email);
+	        	newestUser.setName(name);
+	        	newestUser.setPassword(password);
+	        	newestUser.setTelefone(telefone);
+	        	newestUser.setModified(new Date());
+	        	newestUser.setCreated(new Date());
         	    try{
         	    	jpaApi.em().persist(newestUser);
         	    }
@@ -111,7 +120,7 @@ public class UserController extends Controller {
         	        String message = e.getCause().getCause().getMessage();
         	        String[] parts = message.split(" ");
         	        if(parts[0].equals("Duplicate")){
-        	        	response.put("message", "E-mail já existente");
+        	        	response.put("message", "E-mail ja existente");
         	        	return badRequest(response);
         	        }
         	    }
@@ -123,10 +132,73 @@ public class UserController extends Controller {
 	
 	@Transactional
 	public Result update(String id) {
-		Query result = jpaApi.em().createNativeQuery("SELECT * FROM User where id = "+id+";");
-		Logger.debug(result.toString());
-		User user = (User) result.getSingleResult();
-		return ok(user.getName());
+		JsonNode json = request().body().asJson();
+		ObjectNode response = Json.newObject();
+		if(json == null) {
+			response.put("message", "Expecting Json data");
+        	return badRequest(response);
+	    } else {
+			Query q = jpaApi.em().createQuery("select f from User f where f.id="+id, User.class);
+	 
+	        User user = null;
+	        try {
+	        	user = (User) q.getSingleResult();
+	        } catch (NoResultException ex) {
+	        	response.put("message", "Usuario invalido");
+	        	return badRequest(response);
+	        } catch (NullPointerException e){
+	        	response.put("message", "Usuario invalido");
+	    		return badRequest(response);
+	        }
+	        String name = json.findPath("name").textValue();
+	        String email = json.findPath("email").textValue();
+	        String password = json.findPath("password").textValue();
+	        String telefone = json.findPath("telefone").textValue();
+	        if(name == null || email == null || password == null || telefone == null) {
+	        	response.put("message", "Parametros faltando");
+	        	return badRequest(response);
+	        } else {
+	        	if(emailIsValid(email)){
+		        	Logger.info("Entered");
+		        	user.setEmail(email);
+		        	user.setName(name);
+		        	user.setPassword(password);
+		        	user.setTelefone(telefone);
+		        	user.setModified(new Date());
+	        	    try{
+	        	    	jpaApi.em().merge(user);
+	        	    	Logger.debug(user.getModified().toString());
+	        	    }
+	        	    catch(PersistenceException e){
+	        	        String message = e.getCause().getCause().getMessage();
+	        	        String[] parts = message.split(" ");
+	        	        if(parts[0].equals("Duplicate")){
+	        	        	response.put("message", "E-mail ja existente");
+	        	        	return badRequest(response);
+	        	        }
+	        	    }
+	        	    JsonNode jsonUser = Json.toJson(user);
+		            return ok(jsonUser);
+	        	} else {
+	        		response.put("message", "E-mail ja existente");
+    	        	return badRequest(response);
+	        	}
+	        }
+	    }
     }
+	
+	public boolean emailIsValid(String email){
+		Query q = jpaApi.em().createQuery("select f from User f where f.email='"+email+"'", User.class);
+		 
+        User user = null;
+        try {
+        	user = (User) q.getSingleResult();
+        } catch (NoResultException ex) {
+        	return true;
+        } catch (NullPointerException e){
+        	return false;
+        }
+		return false;
+	}
 
 }

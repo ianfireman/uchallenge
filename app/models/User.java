@@ -30,6 +30,46 @@ public class User {
     @Column
     private String telefone;
 	
+	public Date getCreated() {
+		return created;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+
+	public Date getModified() {
+		return modified;
+	}
+
+	public void setModified(Date modified) {
+		this.modified = modified;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setTelefone(String telefone) {
+		this.telefone = telefone;
+	}
+
 	@Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created", nullable = false)
     private Date created;
@@ -38,15 +78,15 @@ public class User {
     @Column(name = "modified", nullable = false)
     private Date modified;
     
-    public User(final String name, final String email, final String password, final String telefone){
-    	this.name = name;
-    	this.password = password;
-    	this.email = email;
-    	this.telefone = telefone;
+    public User(){
     }
     
     public Long getId() {
         return id;
+    }
+    
+    public void setId(Long id) {
+        this.id = id;
     }
     
     public String getName() {
@@ -59,15 +99,5 @@ public class User {
     
     public String getTelefone() {
         return telefone;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-    	modified = created = new Date();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-    	modified = new Date();
     }
 }
