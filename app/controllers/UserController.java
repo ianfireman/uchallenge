@@ -58,19 +58,19 @@ public class UserController extends Controller {
             			localUser.put("id", param);
             			break;
             		case 1:
-            			localUser.put("name", param);
-            			break;
-            		case 2:
             			localUser.put("email", param);
             			break;
-            		case 4:
+            		case 3:
             			localUser.put("telefone", param);
             			break;
-            		case 5:
+            		case 4:
             			localUser.put("created", param);
             			break;
-            		case 6:
+            		case 5:
             			localUser.put("modified", param);
+            			break;
+            		case 6:
+            			localUser.put("name", param);
             			break;
             		}
             		index++;
