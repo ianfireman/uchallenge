@@ -145,6 +145,7 @@ public class UserController extends Controller {
         	response.put("message", "Usuario invalido");
     		return badRequest(response);
         }
+        user.setPassword("");
         JsonNode userJson = Json.toJson(user);
         return ok(userJson);
 	}
@@ -205,6 +206,26 @@ public class UserController extends Controller {
 	        }
 	    }
     }
+	
+	@Transactional
+	public Result delete(String id) {
+		ObjectNode response = Json.newObject();
+		Query q = jpaApi.em().createQuery("select f from User f where f.id="+id, User.class);
+		 
+        User user = null;
+        try {
+        	user = (User) q.getSingleResult();
+        	jpaApi.em().remove(user);
+        } catch (NoResultException ex) {
+        	response.put("message", "Usuario invalido");
+        	return badRequest(response);
+        } catch (NullPointerException e){
+        	response.put("message", "Usuario invalido");
+    		return badRequest(response);
+        }
+        JsonNode userJson = Json.toJson(user);
+        return ok(userJson);
+	}
 	
 	public boolean emailIsValid(String email){
 		Query q = jpaApi.em().createQuery("select f from User f where f.email='"+email+"'", User.class);
