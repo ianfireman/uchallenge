@@ -42,7 +42,7 @@ public class UserController extends Controller {
 	public Result index() {
 		Query result = jpaApi.em().createNativeQuery("SELECT * FROM User;");
 		ObjectNode response = Json.newObject();
-		ArrayNode arrayNode = response.putArray("body");
+		ArrayNode arrayNode = response.putArray("");
         List<User> resultList = null;
         try {
             resultList = result.getResultList();
@@ -129,6 +129,25 @@ public class UserController extends Controller {
 	        }
 	    }
     }
+	
+	@Transactional
+	public Result show(String id){
+		Query q = jpaApi.em().createQuery("select f from User f where f.id="+id, User.class);
+		ObjectNode response = Json.newObject();
+		 
+        User user = null;
+        try {
+        	user = (User) q.getSingleResult();
+        } catch (NoResultException ex) {
+        	response.put("message", "Usuario invalido");
+        	return badRequest(response);
+        } catch (NullPointerException e){
+        	response.put("message", "Usuario invalido");
+    		return badRequest(response);
+        }
+        JsonNode userJson = Json.toJson(user);
+        return ok(userJson);
+	}
 	
 	@Transactional
 	public Result update(String id) {

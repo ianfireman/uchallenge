@@ -13,5 +13,6 @@ GET     /message                    controllers.AsyncController.message
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
 GET 	/users						controllers.UserController.index
+GET 	/users/:id					controllers.UserController.show(id: String)
 POST 	/users						controllers.UserController.create
 PUT 	/users/:id				    controllers.UserController.update(id: String)
